@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: american-football-sim
+Version: 0.1.0
+Summary: Hybrid Statis Pro / Techno Bowl-style football sim with Textual UI
+Requires-Python: >=3.12
+Requires-Dist: textual>=0.82.0
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: ruff; extra == "dev"

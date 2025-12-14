@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "american-football-sim"
+version = "0.1.0"
+description = "Hybrid Statis Pro / Techno Bowl-style football sim with Textual UI"
+requires-python = ">=3.12"
+dependencies = ["textual>=0.82.0"]
+
+[project.optional-dependencies]
+dev = ["pytest", "mypy", "black", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.flake8]
+max-line-length = 120

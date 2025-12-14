@@ -1,0 +1,7 @@
+textual>=0.82.0
+
+[dev]
+pytest
+mypy
+black
+ruff
