@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from rich.panel import Panel
-from rich.text import Text
 from rich.table import Table
+from rich.text import Text
 from textual.widgets import Static
 
 from football.engine.game_state import GameState
@@ -16,30 +16,48 @@ TEAM_PALETTE: dict[str, tuple[str, str]] = {
     "DAL": ("dodger_blue2", "white"),
     "G-B": ("green3", "gold1"),
     "K-C": ("red1", "gold1"),
+    "SEA": ("green", "navy_blue"),
 }
 
 FIELD_ART = """┌─────────┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬─────────┐
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │  ◂1│0   │  ◂2│0   │  ◂3│0   │  ◂4│0   │  ◂5│0▸  │   4│0▸  │   3│0▸  │   2│0▸  │   1│0▸  │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │    │    │    │    │    │    │    │    │    │   NFL   │    │    │    │    │    │    │    │    │    │  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │  ◂1│0   │  ◂2│0   │  ◂3│0   │  ◂4│0   │  ◂5│0▸  │   4│0▸  │   3│0▸  │   2│0▸  │   1│0▸  │    │ ▉ ▉ ▉ ▉ │
-│  ▉ ▉ ▉  │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │  ▉ ▉ ▉  │
-│ ▉ ▉ ▉ ▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉ ▉ ▉ ▉ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │  ◂1│0   │  ◂2│0   │  ◂3│0   │  ◂4│0   │  ◂5│0▸  │   4│0▸  │   3│0▸  │   2│0▸  │   1│0▸  │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │    │    │    │    │    │    │    │    │    │   NFL   │    │    │    │    │    │    │    │    │    │ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│||||│ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │  ◂1│0   │  ◂2│0   │  ◂3│0   │  ◂4│0   │  ◂5│0▸  │   4│0▸  │   3│0▸  │   2│0▸  │   1│0▸  │    │ ▉▓▉▓▉▓▉ │
+│ ▓▉▓▉▓▉▓ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▓▉▓▉▓▉▓ │
+│ ▉▓▉▓▉▓▉ │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │ ▉▓▉▓▉▓▉ │
 └─────────┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴─────────┘"""
 
 
 def _team_fg_bg(code: str) -> tuple[str, str]:
     code = (code or "").upper()
     return TEAM_PALETTE.get(code, ("white", "grey35"))
+
+
+def _stylize_endzones(row: Text, primary: str, secondary: str) -> Text:
+    """Style solid and shaded endzone blocks with primary/secondary colors."""
+
+    solid_style = f"bold {primary} on {primary}"
+    shade_style = f"bold {secondary} on {secondary}"
+
+    plain_text = row.plain
+
+    for idx, char in enumerate(plain_text):
+        if char == "▉":
+            row.stylize(solid_style, idx, idx + 1)
+        elif char == "▓":
+            row.stylize(shade_style, idx, idx + 1)
+
+    return row
 
 
 def _apply_midfield_logo(field_art: str, team_code: str) -> Text:
@@ -59,7 +77,7 @@ def _apply_midfield_logo(field_art: str, team_code: str) -> Text:
         if "NFL" in line:
             idx = line.index("NFL")
             before = line[:idx]
-            after = line[idx+3:]
+            after = line[idx + 3:]
 
             # The field already has spaces around 'NFL', so we only swap the 3 letters.
             row = Text.assemble(
@@ -71,7 +89,7 @@ def _apply_midfield_logo(field_art: str, team_code: str) -> Text:
         else:
             row = Text(line, no_wrap=True)
 
-        rows.append(row)
+        rows.append(_stylize_endzones(row, fg, bg))
 
     field_text = Text("\n").join(rows)
     field_text.no_wrap = True

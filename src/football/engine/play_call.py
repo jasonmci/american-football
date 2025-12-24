@@ -16,6 +16,11 @@ class PersonnelGroup(Enum):
       e.g. "11" = 1 RB, 1 TE, 3 WR.
     """
 
+    P00 = "00"  # 0 RB, 0 TE, 5 WR
+    P01 = "01"  # 0 RB, 1 TE, 4 WR
+    P02 = "02"  # 0 RB, 2 TE, 3 WR
+    P03 = "03"  # 0 RB, 3 TE, 2 WR
+    P04 = "04"  # 0 RB, 4 TE, 1 WR
     P10 = "10"  # 1 RB, 0 TE, 4 WR
     P11 = "11"  # 1 RB, 1 TE, 3 WR
     P12 = "12"  # 1 RB, 2 TE, 2 WR
@@ -24,11 +29,9 @@ class PersonnelGroup(Enum):
     P21 = "21"  # 2 RB, 1 TE, 2 WR
     P22 = "22"  # 2 RB, 2 TE, 1 WR
     P23 = "23"  # 2 RB, 3 TE, 0 WR
-    P00 = "00"  # 0 RB, 0 TE, 5 WR
-    P01 = "01"  # 0 RB, 1 TE, 4 WR
-    P02 = "02"  # 0 RB, 2 TE, 3 WR
-    P03 = "03"  # 0 RB, 3 TE, 2 WR
-    P04 = "04"  # 0 RB, 4 TE, 1 WR
+    P30 = "30"  # 3 RB, 0 TE (rare, but fun)
+    P31 = "31"
+    P32 = "32"
 
     @property
     def rb(self) -> int:
@@ -53,9 +56,10 @@ class PlayDirection(Enum):
 
 class PassDepth(Enum):
     """Optional pass depth classification for flavor / tables."""
-    SHORT = auto()       # 0–10 yards
+    QUICK = auto()  # 0–3
+    SHORT = auto()  # 4–10
     INTERMEDIATE = auto()  # 11–19
-    DEEP = auto()        # 20+
+    DEEP = auto()  # 20+
 
 
 class TargetType(Enum):
@@ -66,32 +70,67 @@ class TargetType(Enum):
     WR1 = auto()
     WR2 = auto()
     WR3 = auto()
+    WR4 = auto()
+    WR5 = auto()
     TE1 = auto()
     TE2 = auto()
-    QB = auto()  # keepers, sneaks, scrambles
+    QB = auto()
 
 
 class OffensePlayType(Enum):
-    """High-level offensive play families.
+    """High-level offensive play families."""
 
-    We can expand later, but this is enough for a first-cut engine.
-    """
+    # Runs (core)
+    INSIDE_ZONE = auto()
+    OUTSIDE_ZONE = auto()
+    POWER = auto()
+    COUNTER = auto()
+    TRAP = auto()
+    ISO = auto()
+    SWEEP = auto()
+    TOSS = auto()
 
-    # Run game
-    INSIDE_RUN = auto()  # dives, inside zone, iso
-    OUTSIDE_RUN = auto()  # stretch, toss, outside zone
-    DRAW = auto()  # draw / delay handoff
+    # Specialty runs
+    DRAW = auto()
+    DELAY = auto()
     QB_SNEAK = auto()
-    QB_KEEPER = auto()  # boots, read keepers
+    QB_KEEPER = auto()
+    READ_OPTION = auto()
+    SPEED_OPTION = auto()
+    JET_SWEEP = auto()
+    REVERSE = auto()
 
-    # Pass game
-    SHORT_PASS = auto()  # slants, quick outs, hitches
-    INTERMEDIATE_PASS = auto()  # digs, comebacks, deep outs
-    DEEP_SHOT = auto()  # posts, go routes, bombs
-    SCREEN_PASS = auto()  # RB/WR screens
-    PLAY_ACTION = auto()  # PA shot or intermediate
+    # Quick game / short passing
+    QUICK_SLANT = auto()
+    QUICK_OUT = auto()
+    QUICK_HITCH = auto()
+    BUBBLE_SCREEN = auto()
+    SMOKE_SCREEN = auto()
+    RB_SCREEN = auto()
+    TE_SCREEN = auto()
 
-    # Game-management
+    # Intermediate concepts
+    DIG = auto()
+    COMEBACK = auto()
+    DEEP_OUT = auto()
+    CROSSERS = auto()
+    MESH = auto()
+    SEAM = auto()
+
+    # Deep concepts
+    GO = auto()
+    POST = auto()
+    CORNER = auto()
+    FADE = auto()
+    DEEP_CROSS = auto()
+
+    # Play-action / movement
+    PLAY_ACTION_SHORT = auto()
+    PLAY_ACTION_SHOT = auto()
+    BOOTLEG = auto()
+    ROLL_OUT = auto()
+
+    # Game management
     SPIKE = auto()
     KNEEL = auto()
 
@@ -104,7 +143,7 @@ class OffensivePlayCall:
     play_type: OffensePlayType
     direction: Optional[PlayDirection] = None
     pass_depth: Optional[PassDepth] = None
-    target: Optional[TargetType] = None
+    primary_target: Optional[TargetType] = None
 
     # For future: token/hidden selection mechanism, audibles, etc.
     token_id: Optional[str] = None  # Techno-Bowl-style token reference
@@ -114,35 +153,44 @@ class OffensivePlayCall:
 
 
 class DefenseFront(Enum):
-    """Defensive front / sub-package."""
+    # Base families
+    FOUR_THREE = auto()
+    THREE_FOUR = auto()
 
-    BASE = auto()  # 3-4 / 4-3 base
-    NICKEL = auto()  # 5 DBs
-    DIME = auto()  # 6 DBs
-    GOAL_LINE = auto()  # heavy, many DL/LB
+    # Sub packages
+    NICKEL = auto()
+    DIME = auto()
+    QUARTER = auto()  # 7 DB looks
+    GOAL_LINE = auto()
 
 
 class DefensePlayFlavor(Enum):
-    """What the defense is 'trying' to stop / emphasize."""
+    BASE = auto()
 
-    BASE = auto()  # balanced
-    RUN_FOCUS = auto()  # selling out vs run (boxes, slants)
-    PASS_FOCUS = auto()  # lighter box, coverage emphasis
-    RUN_BLITZ = auto()  # run-focused pressure
-    PASS_BLITZ = auto()  # pressure vs pass, extra rushers
-    ALL_OUT_BLITZ = auto()  # zero-style heat
-    PREVENT = auto()  # back off, protect deep
-    CONTAIN = auto()  # edges, QB contain/spies
+    # Run emphasis
+    RUN_FOCUS = auto()
+    RUN_BLITZ = auto()
+    GOAL_LINE_SOLD_OUT = auto()
+
+    # Pass emphasis
+    PASS_FOCUS = auto()
+    PASS_BLITZ = auto()
+    ALL_OUT_BLITZ = auto()
+
+    # Situational
+    PREVENT = auto()
+    CONTAIN = auto()
+    QB_SPY = auto()
 
 
 class CoverageShell(Enum):
-    """Coverage structure (simplified)."""
-
+    ZERO = auto()
     COVER_1 = auto()
     COVER_2 = auto()
+    TAMPA_2 = auto()
     COVER_3 = auto()
     COVER_4 = auto()
-    ZERO = auto()  # man-zero / no deep help
+    COVER_6 = auto()  # quarter-quarter-half
 
 
 @dataclass(slots=True)

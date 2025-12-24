@@ -1,0 +1,55 @@
+Screen {
+    layout: vertical;
+    background: #001219;
+    color: #f1faee;
+}
+
+/* Row heights */
+#top-row {
+    height: 24%;
+    layout: horizontal;
+}
+
+#middle-row {
+    height: 46%;
+    layout: horizontal;
+    padding: 0 1;
+}
+
+#bottom-row {
+    height: 30%;
+}
+
+/* Top row: AWAY | SCOREBOARD | HOME (same height) */
+#away-playcall, #scoreboard, #home-playcall {
+    width: 1fr;
+    height: 100%;
+    padding: 1;
+}
+
+/* Middle row: left column (situation + drive) and right field */
+#situation-column {
+    width: 1fr;
+    align-vertical: top;
+    padding: 0 1 0 0;
+}
+
+#situation {
+    /* let content define height */
+}
+
+#current-drive {
+    margin-top: 1;
+}
+
+#field {
+    width: 126;      /* fixed to ASCII field width */
+    height: 100%;
+    padding: 0;
+}
+
+/* Bottom row: play log */
+#play-log {
+    height: 100%;
+    padding: 1;
+}
