@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-
+from textual.widgets import TabbedContent, TabPane
 from football.engine.engine import resolve_play
 from football.engine.game_state import GameState, Side
 from football.engine.play_call import PlayCall
-
+from football.ui.widgets.playbook.offense_playbook_view import OffensePlaybookView
+from football.ui.widgets.playbook.defense_playbook_view import DefensePlaybookView
 from football.ui.theme import team_style
 
 # --- Widgets (adjust import paths if your filenames differ) ---
@@ -16,6 +17,9 @@ from football.ui.widgets.field_view import FieldView
 from football.ui.widgets.down_distance import DownDistance
 from football.ui.widgets.current_drive import CurrentDrive
 from football.ui.widgets.play_log import PlayLog
+
+from football.ui.widgets.playbook.offense_playbook_view import OffensePlaySelected
+from football.ui.widgets.playbook.defense_playbook_view import DefensePlaySelected
 
 
 class FootballApp(App):
@@ -55,9 +59,22 @@ class FootballApp(App):
     # ----------------------------
 
     def compose(self) -> ComposeResult:
-        # Top / Middle / Bottom rows
+
+        with TabbedContent(id="tabs"):
+            with TabPane("Game", id="tab-game"):
+                yield from self._compose_game_tab()
+
+            with TabPane("Offense", id="tab-offense"):
+                self.offense_playbook = OffensePlaybookView(id="offense-playbook")
+                yield self.offense_playbook
+
+            with TabPane("Defense", id="tab-defense"):
+                self.defense_playbook = DefensePlaybookView(id="defense-playbook")
+                yield self.defense_playbook
+
+    def _compose_game_tab(self) -> ComposeResult:
+        # This is basically your current compose(), but as a helper
         with Vertical(id="root"):
-            # TOP: away playcall | scoreboard | home playcall
             with Horizontal(id="top-row"):
                 self.away_panel = PlaycallPanel(team_side=Side.AWAY, id="away-playcall")
                 yield self.away_panel
@@ -68,7 +85,6 @@ class FootballApp(App):
                 self.home_panel = PlaycallPanel(team_side=Side.HOME, id="home-playcall")
                 yield self.home_panel
 
-            # MIDDLE: situation+drive (left) | field (center)
             with Horizontal(id="middle-row"):
                 with Vertical(id="left-mid"):
                     self.situation = DownDistance(id="situation", state=self.state)
@@ -81,7 +97,6 @@ class FootballApp(App):
                     self.field = FieldView(id="field", state=self.state)
                     yield self.field
 
-            # BOTTOM: play log
             with Vertical(id="bottom-row"):
                 self.play_log = PlayLog(id="play-log")
                 yield self.play_log
@@ -92,6 +107,47 @@ class FootballApp(App):
         self._update_all_stateful_widgets()
         # Start focused on the offense panel
         self._focus_offense_panel()
+
+    def on_offense_play_selected(self, message: OffensePlaySelected) -> None:
+        """Handle play selection from Offense tab and apply to the current offense panel."""
+        # Determine which side is currently on offense
+        if self.state.possession is Side.HOME:
+            offense_panel = self.home_panel
+        else:
+            offense_panel = self.away_panel
+
+        offense_panel.apply_offense_playbook_selection(
+            personnel=message.personnel,
+            play_type=message.play_type,
+            direction=message.direction,
+            target=message.target,
+            depth=message.depth,
+        )
+
+        # Switch back to Game tab
+        tabs = self.query_one("#tabs", TabbedContent)
+        tabs.active = "tab-game"
+
+        # Ensure panels are in correct OFFENSE/DEFENSE mode and focus offense
+        self._sync_playcall_modes()
+        self._focus_offense_panel()
+
+    def on_defense_play_selected(self, message: DefensePlaySelected) -> None:
+        # team on defense is the opposite of possession
+        defense_side = Side.AWAY if self.state.possession is Side.HOME else Side.HOME
+        defense_panel = self.away_panel if defense_side is Side.AWAY else self.home_panel
+
+        defense_panel.apply_defense_playbook_selection(
+            front=message.front,
+            flavor=message.flavor,
+            coverage=message.coverage,
+        )
+
+        tabs = self.query_one("#tabs", TabbedContent)
+        tabs.active = "tab-game"
+
+        self._sync_playcall_modes()
+        self._focus_defense_panel()
 
     # ----------------------------
     # Helpers
@@ -127,6 +183,12 @@ class FootballApp(App):
             self.home_panel.focus()
         else:
             self.away_panel.focus()
+
+    def _focus_defense_panel(self) -> None:
+        if self.state.possession is Side.HOME:
+            self.away_panel.focus()
+        else:
+            self.home_panel.focus()
 
     def _team_abbr_for_side(self, side: Side) -> str:
         return self.state.home_abbr if side is Side.HOME else self.state.away_abbr

@@ -92,22 +92,6 @@ class PlaycallPanel(Widget):
             self.off_pass_depth = pass_depth
         self.refresh()
 
-    def apply_defense_selection(
-        self,
-        *,
-        front=None,
-        flavor=None,
-        coverage=None,
-    ) -> None:
-        """Optionally set current defense selections (used by app sync)."""
-        if front is not None:
-            self.def_front = front
-        if flavor is not None:
-            self.def_flavor = flavor
-        if coverage is not None:
-            self.def_coverage = coverage
-        self.refresh()
-
     def get_offensive_play_call(self, state: GameState) -> OffensivePlayCall:
         # (Optional) infer pass depth for some pass types if unset
         pass_depth = self.off_pass_depth
@@ -138,6 +122,38 @@ class PlaycallPanel(Widget):
             flavor=self.def_flavor,
             coverage=self.def_coverage,
         )
+
+    def apply_offense_playbook_selection(
+        self,
+        personnel: PersonnelGroup,
+        play_type: OffensePlayType,
+        direction: PlayDirection | None = None,
+        target: TargetType | None = None,
+        depth: PassDepth | None = None,
+    ) -> None:
+        """Apply a play chosen from the Offense playbook tab."""
+        self.off_personnel = personnel
+        self.off_play_type = play_type
+
+        if direction is not None:
+            self.off_direction = direction
+        if target is not None:
+            self.off_primary_target = target
+        if depth is not None:
+            self.off_pass_depth = depth
+
+        self.refresh()
+
+    def apply_defense_playbook_selection(
+        self,
+        front: DefenseFront,
+        flavor: DefensePlayFlavor,
+        coverage: CoverageShell,
+    ) -> None:
+        self.def_front = front
+        self.def_flavor = flavor
+        self.def_coverage = coverage
+        self.refresh()
 
     # ---------- Input handling ----------
 
