@@ -1,7 +1,5 @@
 # src/football/playbooks/offense_cards_default.py
 from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Dict, Iterable, Optional, Tuple
 
 from football.engine.play_call import (

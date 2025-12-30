@@ -23,6 +23,10 @@ from football.ui.widgets.playbook.defense_playbook_view import DefensePlaySelect
 
 
 class FootballApp(App):
+    @property
+    def game_state(self) -> GameState:
+        return self.state
+
     TITLE = "American Football Hybrid Sim"
     CSS_PATH = "app.tcss"  # optional; ok if you don't have it yet
 
@@ -41,8 +45,10 @@ class FootballApp(App):
         self.state: GameState = GameState.initial(
             home_name="Seattle Seahawks",
             home_abbr="SEA",
+            home_color="green",
             away_name="Dallas Cowboys",
             away_abbr="DAL",
+            away_color="dodger_blue2",
         )
 
         # Widgets get assigned in compose()
@@ -164,19 +170,18 @@ class FootballApp(App):
 
         # Playcall panels don't need state to render (they hold selections),
         # but if you display context like DOWN/DIST, you can pass state too.
-        if hasattr(self.away_panel, "set_state"):
-            self.away_panel.set_state(self.state)  # optional
-        if hasattr(self.home_panel, "set_state"):
-            self.home_panel.set_state(self.state)  # optional
+        # if hasattr(self.away_panel, "set_state"):
+        #     self.away_panel.set_state(self.state)  # optional
+        # if hasattr(self.home_panel, "set_state"):
+        #     self.home_panel.set_state(self.state)  # optional
 
     def _sync_playcall_modes(self) -> None:
-        """Set which panel is OFFENSE/DEFENSE based on possession."""
-        if self.state.possession is Side.HOME:
-            self.home_panel.set_offense()
-            self.away_panel.set_defense()
+        if self.state.possession is Side.AWAY:
+            self.away_panel.set_unit("OFFENSE")
+            self.home_panel.set_unit("DEFENSE")
         else:
-            self.away_panel.set_offense()
-            self.home_panel.set_defense()
+            self.away_panel.set_unit("DEFENSE")
+            self.home_panel.set_unit("OFFENSE")
 
     def _focus_offense_panel(self) -> None:
         if self.state.possession is Side.HOME:

@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from typing import TYPE_CHECKING, cast
 from typing import Literal, Optional, TypeVar
 
 from rich.panel import Panel
@@ -7,6 +7,7 @@ from rich.table import Table
 from rich.text import Text
 from textual.widget import Widget
 from textual import events
+# from textual.app import App
 
 from football.engine.game_state import GameState, Side
 from football.engine.play_call import (
@@ -24,6 +25,9 @@ from football.engine.play_call import (
 
 T = TypeVar("T")
 
+if TYPE_CHECKING:
+    from football.ui.app import FootballApp
+
 
 def _cycle(values: list[T], current: T, step: int = 1) -> T:
     if not values:
@@ -37,6 +41,12 @@ def _fmt_enum(e) -> str:
 
 
 class PlaycallPanel(Widget):
+
+    @property
+    def game(self) -> "FootballApp":
+        # self.app is typed as App[Unknown]; cast makes Pylance happy.
+        return cast("FootballApp", self.app)
+
     can_focus = True
 
     def __init__(self, team_side: Side, **kwargs) -> None:
@@ -57,6 +67,10 @@ class PlaycallPanel(Widget):
         self.def_coverage: CoverageShell = CoverageShell.COVER_2
 
     # ---------- Build engine calls ----------
+
+    def set_unit(self, unit: Literal["OFFENSE", "DEFENSE"]) -> None:
+        self.unit = unit
+        self.refresh()
 
     def set_offense(self) -> None:
         self.mode = "OFFENSE"
@@ -160,12 +174,6 @@ class PlaycallPanel(Widget):
     def on_key(self, event: events.Key) -> None:
         key = event.key
 
-        if key == "tab":
-            self.mode = "DEFENSE" if self.mode == "OFFENSE" else "OFFENSE"
-            self.refresh()
-            event.stop()
-            return
-
         if key == "p":
             self.off_personnel = _cycle(list(PersonnelGroup), self.off_personnel)
             self.refresh()
@@ -230,7 +238,18 @@ class PlaycallPanel(Widget):
     # ---------- Render ----------
 
     def render(self) -> Panel:
-        title = f"{self.team_side.value} ({self.mode})"
+        s = self.game.state
+
+        if self.team_side is Side.AWAY:
+            abbr = s.away_abbr
+            color = s.away_color
+            unit = "OFFENSE" if s.possession is Side.AWAY else "DEFENSE"
+        else:
+            abbr = s.home_abbr
+            color = s.home_color
+            unit = "OFFENSE" if s.possession is Side.HOME else "DEFENSE"
+
+        title = Text(f"{abbr} {unit}", style=f"bold {color}")
 
         border = "bright_magenta" if self.has_focus else "magenta"
 

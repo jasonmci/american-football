@@ -68,8 +68,10 @@ class GameState:
     # Teams / metadata
     home_name: str
     home_abbr: str
+    home_color: str
     away_name: str
     away_abbr: str
+    away_color: str
 
     # Game progress
     quarter: int  # 1–4 (5+ = OT)
@@ -103,6 +105,8 @@ class GameState:
         *,
         home_name: str,
         home_abbr: str,
+        home_color: str,
+        away_color: str,
         away_name: str,
         away_abbr: str,
         home_receives: bool = True,
@@ -116,6 +120,8 @@ class GameState:
             home_abbr=home_abbr,
             away_name=away_name,
             away_abbr=away_abbr,
+            home_color=home_color,
+            away_color=away_color,
             quarter=1,
             time_remaining=15 * 60,  # 15:00 per quarter
             possession=receiving_side,

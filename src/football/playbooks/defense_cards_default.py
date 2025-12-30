@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 
 from football.engine.play_call import DefenseFront, DefensePlayFlavor, CoverageShell
 from football.playbooks.defense_card import DefensivePlaycallingCard, DefenseOption
